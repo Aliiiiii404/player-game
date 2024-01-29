@@ -4,6 +4,7 @@ from pygame import draw
 import random
 from pygame import mixer
 import time
+from PIL import Image
 
 pygame.init()
 mixer.init()
@@ -29,15 +30,15 @@ random_top = random.randint(0, 400)
 random_left = random.randint(0, 200)
 random_width = random.randint(0, 80)
 random_height = random.randint(0, 80)
-#pig image
-pig = pygame.image.load("Assets/pig.png").convert_alpha()
-pig = pygame.transform.scale(pig, (60, 60)) 
-rect = pig.get_rect(x=0, y=0)
+#player image
+player = pygame.image.load("./Assets/player.png").convert_alpha()
+player = pygame.transform.scale(player, (60, 60)) 
+rect = player.get_rect(x=0, y=0)
 #food image
-food = pygame.image.load("Assets/burger.png").convert_alpha()
+food = pygame.image.load("./Assets/food.png").convert_alpha()
 food = pygame.transform.scale(food, (60, 60)) 
 #background sound
-mixer.music.load("pygame/background.wav")
+mixer.music.load("./Assets/background.wav")
 mixer.music.play(-1)
 mixer.music.set_volume(0.1)
 
@@ -53,7 +54,7 @@ def drawScore():
     global score, level_goals, level
     if score == level_goals[level]:
         level += 1
-    text = TEXT_FONT.render("Burger Amount : " + str(score) + "/" + str(level_goals[level]) , 1, BLACK)
+    text = TEXT_FONT.render("Diamond Amount : " + str(score) + "/" + str(level_goals[level]) , 1, BLACK)
     text_rect = text.get_rect(center=(WIDTH - 100, HEIGHT - 20))
     SCREEN.blit(text, text_rect)
 
@@ -70,39 +71,51 @@ def drawFood():
 def darwHelthBar():
     pygame.draw.rect(SCREEN, RED, (50, HEIGHT - 30, player_helth, 20))
 
+def main():
+    global run, rect, obstacle, player_helth, score, player, random_top, random_left, random_width, random_height
+    run = True
+    while run:
+        clock.tick(FPS)
+        quit_game()
+        SCREEN.fill(WHITE)
 
-run = True
-while run:
-    clock.tick(FPS)
-    quit_game()
-    SCREEN.fill(WHITE)
+        keys_pressed = pygame.key.get_pressed()
+        if keys_pressed[pygame.K_LEFT] and rect.x > 0:  # a gauche
+            rect.x -= SPEED
+        if keys_pressed[pygame.K_RIGHT] and rect.x < WIDTH-40:  # a droite
+            rect.x += SPEED
+        if keys_pressed[pygame.K_UP] and rect.y > 0:  # en haut
+            rect.y -=SPEED
+        if keys_pressed[pygame.K_DOWN] and rect.y < WIDTH-40:  # en bas
+            rect.y +=SPEED
 
-    keys_pressed = pygame.key.get_pressed()
-    if keys_pressed[pygame.K_q] and rect.x > 0:  # a gauche
-        rect.x -= SPEED
-    if keys_pressed[pygame.K_d] and rect.x < WIDTH-40:  # a droite
-        rect.x += SPEED
-    if keys_pressed[pygame.K_z] and rect.y > 0:  # en haut
-        rect.y -=SPEED
-    if keys_pressed[pygame.K_s] and rect.y < WIDTH-40:  # en bas
-        rect.y +=SPEED
-
-    if rect.colliderect(obstacle):
-        random_top = random.randint(0, 400)
-        random_left = random.randint(0, 200)
-        random_width = random.randint(0, 80)
-        random_height = random.randint(0, 80)
-        score = score + 1
-        obstacle = pygame.Rect(random_left, random_top, random_width, random_height)
-    else:
-        player_helth = player_helth - 10
+        if rect.colliderect(obstacle):
+            random_top = random.randint(0, 400)
+            random_left = random.randint(0, 200)
+            random_width = random.randint(0, 80)
+            random_height = random.randint(0, 80)
+            score = score + 1
+            obstacle = pygame.Rect(random_left, random_top, random_width, random_height)
+            player_helth = player_helth + 10
+        elif player_helth <= 0:
+            run = False
+            print("GAME OVER")
+        else:
+            player_helth = player_helth - 0.1
 
 
-    pig = pygame.transform.rotate(pig, 0)
-    SCREEN.blit(pig, rect)
-    drawFood()
-    darwHelthBar()
-    drawScore()
-    drawLevel()
-    pygame.time.delay(30)
-    pygame.display.update()
+        player = pygame.transform.rotate(player, 0)
+        SCREEN.blit(player, rect)
+        drawFood()
+        darwHelthBar()
+        drawScore()
+        drawLevel()
+        pygame.time.delay(30)
+        pygame.display.update()
+
+if __name__ == "__main__":
+    main()
+
+
+
+    
